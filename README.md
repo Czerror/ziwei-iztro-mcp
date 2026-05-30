@@ -24,8 +24,8 @@ npm install -g ziwei-mcp
 ### 从源码安装
 
 ```bash
-git clone https://github.com/archenemy/iztro.git
-cd iztro/mcp-server
+git clone https://github.com/Czerror/ziwei-iztro-mcp.git
+cd ziwei-iztro-mcp
 npm install
 npm run build
 npm link
