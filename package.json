@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "iztro": "*",
+    "iztro": "latest",
     "zod": "^4.0.0"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/archenemy/iztro"
+    "url": "https://github.com/Czerror/ziwei-iztro-mcp"
   },
   "license": "MIT",
   "engines": {
