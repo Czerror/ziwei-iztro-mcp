@@ -67,7 +67,6 @@ export const getSurroundedPalacesTool = {
       const astrolabe = createAstrolabe({
         ...reconstructionKey,
         fixLeap: true,
-        language: 'zh-CN',
         astroType: 'heaven',
       });
       const index = resolvePalaceIndex(astrolabe, palaceQuery);

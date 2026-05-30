@@ -1379,7 +1379,6 @@ export const getPatternsTool = {
       const astrolabe = createAstrolabe({
         ...reconstructionKey,
         fixLeap: true,
-        language: 'zh-CN',
         astroType: 'heaven',
       });
 

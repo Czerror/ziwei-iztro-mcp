@@ -47,10 +47,6 @@ export const AstrolabeOptionsSchema = z.object({
   gender: GenderSchema,
   isLeapMonth: z.boolean().optional().default(false),
   fixLeap: z.boolean().optional().default(true),
-  language: z
-    .enum(['zh-CN', 'zh-TW', 'en-US', 'ja-JP', 'ko-KR', 'vi-VN'])
-    .optional()
-    .default('zh-CN'),
   astroType: z.enum(['heaven', 'earth', 'human']).optional().default('heaven'),
   longitude: z.number().min(-180).max(180).optional()
     .describe('出生地经度（东经为正）。AI可根据用户提供的城市名自行推断经纬度，如北京=116.4、上海=121.5'),

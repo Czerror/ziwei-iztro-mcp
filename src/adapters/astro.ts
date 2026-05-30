@@ -71,7 +71,6 @@ export function createAstrolabe(options: AstrolabeOptions): IAstrolabeInstance {
     gender,
     isLeapMonth = false,
     fixLeap = true,
-    language,
     astroType = 'heaven',
     config: cfg,
   } = options;
@@ -88,14 +87,13 @@ export function createAstrolabe(options: AstrolabeOptions): IAstrolabeInstance {
       gender: gender as 'male' | 'female',
       isLeapMonth,
       fixLeap,
-      language,
       astroType,
       config: cfg,
     }) as unknown as IAstrolabeInstance;
   }
 
   if (dateType === 'solar') {
-    return astro.bySolar(date, timeIndex, gender as 'male' | 'female', fixLeap, language) as unknown as IAstrolabeInstance;
+    return astro.bySolar(date, timeIndex, gender as 'male' | 'female', fixLeap, 'zh-CN') as unknown as IAstrolabeInstance;
   }
 
   return astro.byLunar(
@@ -104,6 +102,6 @@ export function createAstrolabe(options: AstrolabeOptions): IAstrolabeInstance {
     gender as 'male' | 'female',
     isLeapMonth,
     fixLeap,
-    language,
+    'zh-CN',
   ) as unknown as IAstrolabeInstance;
 }

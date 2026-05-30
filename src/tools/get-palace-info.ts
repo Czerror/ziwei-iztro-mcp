@@ -31,7 +31,6 @@ export const getPalaceInfoTool = {
       const astrolabe = createAstrolabe({
         ...reconstructionKey,
         fixLeap: true,
-        language: 'zh-CN',
         astroType: 'heaven',
       });
       const palace = getPalaceInfo(astrolabe, palaceQuery);

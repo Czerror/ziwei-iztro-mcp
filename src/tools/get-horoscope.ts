@@ -34,7 +34,6 @@ export const getHoroscopeTool = {
       const astrolabe = createAstrolabe({
         ...reconstructionKey,
         fixLeap: true,
-        language: 'zh-CN',
         astroType: 'heaven',
       });
       const result = createHoroscope(astrolabe, targetDate, targetTimeIndex);

@@ -73,7 +73,6 @@ export const getStarInfoTool = {
       const astrolabe = createAstrolabe({
         ...reconstructionKey,
         fixLeap: true,
-        language: 'zh-CN',
         astroType: 'heaven',
       });
       const found = findStarInPalaces(astrolabe, starName);
