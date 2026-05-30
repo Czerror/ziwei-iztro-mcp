@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/servers/main/schema.json",
+  "mcpServers": {
+    "ziwei-mcp": {
+      "command": "ziwei-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}
