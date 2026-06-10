@@ -70,11 +70,7 @@ export const getStarInfoTool = {
   handler: async (input: GetStarInfoInput) => {
     try {
       const { reconstructionKey, starName } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
       const found = findStarInPalaces(astrolabe, starName);
 
       if (!found) {

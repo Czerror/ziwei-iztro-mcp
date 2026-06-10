@@ -3,7 +3,7 @@ import { GenderSchema } from './astro.js';
 
 /**
  * 星盘重建密钥 Schema（最小参数集，用于下游 Tool 重建星盘实例）
- * 仅包含 5 个必要字段，避免 AI 传递庞大的完整星盘数据时遗漏字段。
+ * 仅包含重建星盘所需的核心字段，避免 AI 传递庞大的完整星盘数据时遗漏字段。
  */
 export const ReconstructionKeySchema = z.object({
   dateType: z.enum(['solar', 'lunar']),
@@ -11,6 +11,8 @@ export const ReconstructionKeySchema = z.object({
   timeIndex: z.number().int().min(0).max(12),
   gender: GenderSchema,
   isLeapMonth: z.boolean().optional().default(false),
+  fixLeap: z.boolean().optional().default(true),
+  astroType: z.enum(['heaven', 'earth', 'human']).optional().default('heaven'),
 });
 
 /** 星盘重建密钥类型 */

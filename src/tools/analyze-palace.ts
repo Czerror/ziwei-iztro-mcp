@@ -59,11 +59,7 @@ export const analyzePalaceTool = {
   handler: async (input: AnalyzePalaceInput) => {
     try {
       const { reconstructionKey, palace: palaceQuery } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
       const palace = getPalaceInfo(astrolabe, palaceQuery) as IExtendedPalace | undefined;
 
       if (!palace) {

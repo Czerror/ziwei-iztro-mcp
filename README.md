@@ -16,7 +16,7 @@
 - **快捷查询**：生肖、星座、命宫主星等独立查询，无需创建完整星盘
 - **全局配置**：四化规则、星耀亮度、年/运限分界点、安星算法等参数可定制
 - **知识资源**：通过 MCP Resource 暴露星耀目录、宫位对照表、天干地支、合盘知识库（倪海夏体系）等
-- **轻量重建**：`reconstructionKey` 机制——下游工具仅需 5 个字段即可重建星盘，无需传递庞大数据
+- **轻量重建**：`reconstructionKey` 机制——下游工具仅需少量核心字段即可重建星盘，无需传递庞大数据
 
 ---
 
@@ -376,7 +376,7 @@ ziwei-mcp
 }
 ```
 
-`reconstructionKey` 仅含 5 个字段（`dateType`/`date`/`timeIndex`/`gender`/`isLeapMonth`），从 [`get_astrolabe`](#get_astrolabe) 响应中直接复制即可传递给所有下游 Tool。
+`reconstructionKey` 包含 `dateType`/`date`/`timeIndex`/`gender`/`isLeapMonth`/`fixLeap`/`astroType` 等核心字段，从 [`get_astrolabe`](#get_astrolabe) 响应中直接复制即可传递给所有下游 Tool。
 
 ---
 

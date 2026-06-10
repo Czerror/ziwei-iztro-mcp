@@ -1376,11 +1376,7 @@ export const getPatternsTool = {
   handler: async (input: GetPatternsInput) => {
     try {
       const { reconstructionKey, category } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
 
       const results: PatternResult[] = [];
 

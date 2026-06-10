@@ -60,6 +60,10 @@ function buildPreciseBeijingTime(date: string, time?: string, hour?: number, tim
   return buildBeijingTime(date, timeIndex ?? 0);
 }
 
+function getDatePart(dateTime: string): string {
+  return dateTime.split(' ')[0];
+}
+
 /**
  * get_astrolabe Tool — 根据出生日期和时间创建紫微斗数星盘
  *
@@ -92,25 +96,44 @@ export const getAstrolabeTool = {
       };
       const rawTimeIndex: number = resolveTimeIndex();
       let effectiveTimeIndex = rawTimeIndex;
+      let effectiveDateType = input.dateType;
+      let effectiveDate = input.date;
       let solarTimeResult: Record<string, unknown> | null = null;
 
       if (longitude !== undefined) {
-        const beijingTime = buildPreciseBeijingTime(date, time, hour, rawTimeIndex);
+        const baseSolarDate =
+          input.dateType === 'solar'
+            ? date
+            : createAstrolabe({
+                ...input,
+                timeIndex: rawTimeIndex,
+              }).solarDate;
+        const paddedBaseSolarDate = padDate(baseSolarDate);
+        const beijingTime = buildPreciseBeijingTime(baseSolarDate, time, hour, rawTimeIndex);
         const apparentSolarTime = convertToApparentSolarTime(
           beijingTime,
           longitude,
           input.latitude,
         );
+        const apparentSolarDate = getDatePart(apparentSolarTime);
         const solarHour = new Date(apparentSolarTime).getHours();
         const solarTimeIndex = hourToTimeIndex(solarHour);
 
-        if (solarTimeIndex !== rawTimeIndex) {
-          effectiveTimeIndex = solarTimeIndex;
+        effectiveDateType = 'solar';
+        effectiveDate = apparentSolarDate;
+        effectiveTimeIndex = solarTimeIndex;
+
+        if (solarTimeIndex !== rawTimeIndex || apparentSolarDate !== paddedBaseSolarDate) {
           solarTimeResult = {
             corrected: true,
             beijingTime,
             apparentSolarTime,
             longitude,
+            originalDateType: input.dateType,
+            originalDate: input.date,
+            baseSolarDate: paddedBaseSolarDate,
+            adjustedDateType: effectiveDateType,
+            adjustedDate: effectiveDate,
             originalTimeIndex: rawTimeIndex,
             adjustedTimeIndex: solarTimeIndex,
           };
@@ -120,6 +143,11 @@ export const getAstrolabeTool = {
             beijingTime,
             apparentSolarTime,
             longitude,
+            originalDateType: input.dateType,
+            originalDate: input.date,
+            baseSolarDate: paddedBaseSolarDate,
+            adjustedDateType: effectiveDateType,
+            adjustedDate: effectiveDate,
             timeIndex: rawTimeIndex,
             message: '真太阳时校正后时辰未变化，使用原始时辰',
           };
@@ -128,17 +156,21 @@ export const getAstrolabeTool = {
 
       const effectiveOptions = {
         ...input,
+        dateType: effectiveDateType,
+        date: effectiveDate,
         timeIndex: effectiveTimeIndex,
       };
       const astrolabe = createAstrolabe(effectiveOptions);
       const formatted = formatAstrolabeResponse(astrolabe);
 
       const reconstructionKey = {
-        dateType: input.dateType,
-        date: input.date,
+        dateType: effectiveDateType,
+        date: effectiveDate,
         timeIndex: effectiveTimeIndex,
         gender: input.gender,
-        isLeapMonth: input.isLeapMonth ?? false,
+        isLeapMonth: effectiveDateType === 'lunar' ? input.isLeapMonth ?? false : false,
+        fixLeap: input.fixLeap ?? true,
+        astroType: input.astroType ?? 'heaven',
       };
       const result: Record<string, unknown> = {
         ...formatted,
@@ -164,8 +196,8 @@ export const getAstrolabeTool = {
         },
       };
 
-      // 当真太阳时跨时辰时，同时排出原时辰星盘供 AI 对比
-      if (solarTimeResult?.corrected && rawTimeIndex !== effectiveTimeIndex) {
+      // 当真太阳时导致日期或时辰变化时，同时排出原始输入星盘供 AI 对比
+      if (solarTimeResult?.corrected) {
         const originalOptions = {
           ...input,
           timeIndex: rawTimeIndex,
@@ -179,9 +211,11 @@ export const getAstrolabeTool = {
           timeIndex: rawTimeIndex,
           gender: input.gender,
           isLeapMonth: input.isLeapMonth ?? false,
+          fixLeap: input.fixLeap ?? true,
+          astroType: input.astroType ?? 'heaven',
         };
         result.comparisonNote =
-          '真太阳时校正导致时辰变化，当前星盘使用校正后时辰。originalAstrolabe 为原始时辰星盘，可通过 originalReconstructionKey 独立查询。';
+          '真太阳时校正导致日期或时辰变化，当前星盘使用校正后的公历日期和时辰。originalAstrolabe 为原始输入星盘，可通过 originalReconstructionKey 独立查询。';
       }
 
       return { content: [{ type: 'text' as const, text: toJSON(result) }] };
