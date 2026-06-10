@@ -39,10 +39,10 @@ export const AstrolabeOptionsSchema = z.object({
   dateType: z.enum(['solar', 'lunar']),
   date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D'),
   timeIndex: z.number().int().min(0).max(12).optional().default(0)
-    .describe('时辰索引（0=子时~11=亥时, 12=晚子时）。与hour/time二选一'),
+    .describe('时辰索引（0=子时~11=亥时, 12=晚子时）。未提供time/hour时使用'),
   hour: z.number().int().min(0).max(23).optional()
     .describe('出生小时(0-23)，如09:35填9。MCP自动换算时辰'),
-  time: z.string().regex(/^\d{1,2}:\d{2}$/, '格式HH:MM，如09:15').optional()
+  time: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, '格式必须为 HH:MM，小时 0-23，分钟 00-59').optional()
     .describe('出生时间字符串，如"09:15"、"9:35"。MCP自动提取小时并换算时辰'),
   gender: GenderSchema,
   isLeapMonth: z.boolean().optional().default(false),

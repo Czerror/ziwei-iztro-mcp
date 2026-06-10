@@ -80,10 +80,10 @@ export const getAstrolabeTool = {
   handler: async (input: z.infer<typeof AstrolabeOptionsSchema>) => {
     try {
       const { longitude, date, hour, time } = input;
-      // 优先级: timeIndex > time(字符串) > hour，MCP 内部自动换算
+      // 优先级: time(精确时间) > hour(小时) > timeIndex(时辰)，MCP 内部自动换算
       const resolveTimeIndex = (): number => {
         if (time !== undefined) {
-          return Math.floor(((parseInt(time.split(':')[0], 10) + 1) % 24) / 2);
+          return Math.floor(((Number(time.split(':')[0]) + 1) % 24) / 2);
         }
         if (hour !== undefined) {
           return Math.floor(((hour + 1) % 24) / 2);
