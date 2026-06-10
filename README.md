@@ -146,7 +146,9 @@ ziwei-mcp
 |------|------|------|------|
 | `dateType` | `"solar" \| "lunar"` | ✓ | 日期类型 |
 | `date` | `string` | ✓ | 日期，格式 `YYYY-M-D`，如 `"2000-1-15"` |
-| `timeIndex` | `number` | ✓ | 时辰索引，0-12（0=早子时, 12=晚子时） |
+| `time` | `string` | | 出生时间，格式 `HH:MM`，小时 0-23，分钟 00-59，如 `"09:15"`、`"9:35"` |
+| `hour` | `number` | | 出生小时，0-23，如 `9` |
+| `timeIndex` | `number` | | 时辰索引，0-12（0=早子时, 12=晚子时），默认 `0` |
 | `gender` | `"male" \| "female"` | ✓ | 性别 |
 | `isLeapMonth` | `boolean` | | 是否闰月（仅农历），默认 `false` |
 | `fixLeap` | `boolean` | | 是否修正闰月，默认 `true` |
@@ -155,6 +157,8 @@ ziwei-mcp
 | `language` | `string` | | 输出语言，默认 `"zh-CN"`，支持 `zh-TW`/`en-US`/`ja-JP`/`ko-KR`/`vi-VN` |
 | `astroType` | `"heaven" \| "earth" \| "human"` | | 星盘类型，默认 `"heaven"`（天盘） |
 | `config` | `object` | | 本次查询的独立配置覆盖 |
+
+时间参数优先级为 `time` > `hour` > `timeIndex`。提供更精确的 `time` 时会自动换算时辰。
 
 ### `get_horoscope`
 
