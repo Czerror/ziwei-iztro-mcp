@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "iztro": "latest",
+    "iztro": "2.5.8",
     "zod": "^4.0.0"
   },
   "devDependencies": {
