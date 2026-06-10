@@ -28,11 +28,7 @@ export const getPalaceInfoTool = {
   handler: async (input: GetPalaceInfoInput) => {
     try {
       const { reconstructionKey, palace: palaceQuery } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
       const palace = getPalaceInfo(astrolabe, palaceQuery);
 
       if (!palace) {

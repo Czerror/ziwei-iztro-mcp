@@ -402,8 +402,8 @@ export const getSynastryTool = {
         astroType: 'heaven' as const,
       };
 
-      const astrolabeA = createAstrolabe({ ...reconstructionKeyA, ...commonOptions });
-      const astrolabeB = createAstrolabe({ ...reconstructionKeyB, ...commonOptions });
+      const astrolabeA = createAstrolabe({ ...commonOptions, ...reconstructionKeyA });
+      const astrolabeB = createAstrolabe({ ...commonOptions, ...reconstructionKeyB });
 
       const personA = buildPersonSummary(astrolabeA);
       const personB = buildPersonSummary(astrolabeB);

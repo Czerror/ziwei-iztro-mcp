@@ -31,11 +31,7 @@ export const getHoroscopeTool = {
   handler: async (input: GetHoroscopeInput) => {
     try {
       const { reconstructionKey, targetDate, timeIndex: targetTimeIndex } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
       const result = createHoroscope(astrolabe, targetDate, targetTimeIndex);
 
       return { content: [{ type: 'text' as const, text: toJSON(result) }] };

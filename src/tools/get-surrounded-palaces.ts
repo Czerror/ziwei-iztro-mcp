@@ -64,11 +64,7 @@ export const getSurroundedPalacesTool = {
   handler: async (input: GetSurroundedPalacesInput) => {
     try {
       const { reconstructionKey, palace: palaceQuery } = input;
-      const astrolabe = createAstrolabe({
-        ...reconstructionKey,
-        fixLeap: true,
-        astroType: 'heaven',
-      });
+      const astrolabe = createAstrolabe(reconstructionKey);
       const index = resolvePalaceIndex(astrolabe, palaceQuery);
       const indices = getSurroundedIndices(index);
 
