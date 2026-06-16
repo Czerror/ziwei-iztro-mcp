@@ -17,6 +17,12 @@ const ConfigureInputSchema = z.object({
   ageDivide: z.enum(AGE_DIVIDE_OPTIONS).optional(),
   dayDivide: z.enum(DAY_DIVIDE_OPTIONS).optional(),
   algorithm: z.enum(ALGORITHM_OPTIONS).optional(),
+  useSolarTime: z
+    .boolean()
+    .optional()
+    .describe(
+      '是否默认启用真太阳时修正。当用户未在每个请求中明确指定时，使用此默认值。默认为 false（不启用修正）',
+    ),
   reset: z.boolean().optional().default(false),
 });
 
@@ -29,6 +35,7 @@ const DEFAULT_CONFIG = {
   ageDivide: 'normal' as const,
   dayDivide: 'forward' as const,
   algorithm: 'default' as const,
+  useSolarTime: false,
 } as const;
 
 /**
@@ -40,12 +47,21 @@ const DEFAULT_CONFIG = {
 export const configureTool = {
   name: 'configure' as const,
   description:
-    '配置服务器全局参数，包括四化规则、星耀亮度、年分界点、运限分界点、小限分界点、晚子时处理方式和安星算法。修改后影响后续所有 Tool 调用。',
+    '配置服务器全局参数，包括四化规则、星耀亮度、年分界点、运限分界点、小限分界点、晚子时处理方式、安星算法和真太阳时默认开关。修改后影响后续所有 Tool 调用。',
   inputSchema: ConfigureInputSchema,
   handler: async (input: ConfigureInput) => {
     try {
-      const { mutagens, brightness, yearDivide, horoscopeDivide, ageDivide, dayDivide, algorithm, reset } =
-        input;
+      const {
+        mutagens,
+        brightness,
+        yearDivide,
+        horoscopeDivide,
+        ageDivide,
+        dayDivide,
+        algorithm,
+        useSolarTime,
+        reset,
+      } = input;
 
       if (reset) {
         astro.config(DEFAULT_CONFIG);
@@ -59,6 +75,7 @@ export const configureTool = {
             ageDivide: currentConfig.ageDivide,
             dayDivide: currentConfig.dayDivide,
             algorithm: currentConfig.algorithm,
+            useSolarTime: DEFAULT_CONFIG.useSolarTime,
           },
           message: '配置已重置为默认值',
         };
@@ -86,6 +103,7 @@ export const configureTool = {
           ageDivide: currentConfig.ageDivide,
           dayDivide: currentConfig.dayDivide,
           algorithm: currentConfig.algorithm,
+          useSolarTime: useSolarTime ?? DEFAULT_CONFIG.useSolarTime,
         },
         message: '配置已更新',
       };

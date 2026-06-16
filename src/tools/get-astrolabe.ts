@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { createAstrolabe } from '../adapters/astro.js';
 import { AstrolabeOptionsSchema } from '../schemas/astro.js';
-import { convertToApparentSolarTime } from '../utils/solar-time.js';
+import { convertToSolarTime } from '../utils/solar-time.js';
 import { formatAstrolabeResponse, toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
 
@@ -96,12 +96,12 @@ export const getAstrolabeTool = {
 
       if (longitude !== undefined) {
         const beijingTime = buildPreciseBeijingTime(date, time, hour, rawTimeIndex);
-        const apparentSolarTime = convertToApparentSolarTime(
-          beijingTime,
-          longitude,
-          input.latitude,
-        );
-        const solarHour = new Date(apparentSolarTime).getHours();
+        const beijingDate = new Date(beijingTime);
+        const solarDate = convertToSolarTime(beijingDate, longitude, input.latitude, true);
+        const solarHour = solarDate.getHours();
+
+        // 格式化 apparentSolarTime 字符串以保持 API 响应兼容
+        const apparentSolarTime = `${solarDate.getFullYear()}-${String(solarDate.getMonth() + 1).padStart(2, '0')}-${String(solarDate.getDate()).padStart(2, '0')} ${String(solarDate.getHours()).padStart(2, '0')}:${String(solarDate.getMinutes()).padStart(2, '0')}:${String(solarDate.getSeconds()).padStart(2, '0')}`;
         const solarTimeIndex = hourToTimeIndex(solarHour);
 
         if (solarTimeIndex !== rawTimeIndex) {

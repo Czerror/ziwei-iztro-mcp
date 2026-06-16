@@ -20,6 +20,97 @@ const RAD_TO_DEG = 180 / Math.PI;
 const EQUATION_RAD_TO_MINUTES = 4 * RAD_TO_DEG;
 
 /**
+ * 时辰到时间区间的映射（24小时制）
+ * key: 时辰名称（不含"时"字）
+ * value: [起始小时, 结束小时]，区间左闭右开
+ */
+export const SHICHEN_MAP: Record<string, [number, number]> = {
+  '子': [23, 1],   // 子时 23:00-01:00
+  '丑': [1, 3],    // 丑时 01:00-03:00
+  '寅': [3, 5],    // 寅时 03:00-05:00
+  '卯': [5, 7],    // 卯时 05:00-07:00
+  '辰': [7, 9],    // 辰时 07:00-09:00
+  '巳': [9, 11],   // 巳时 09:00-11:00
+  '午': [11, 13],  // 午时 11:00-13:00
+  '未': [13, 15],  // 未时 13:00-15:00
+  '申': [15, 17],  // 申时 15:00-17:00
+  '酉': [17, 19],  // 酉时 17:00-19:00
+  '戌': [19, 21],  // 戌时 19:00-21:00
+  '亥': [21, 23],  // 亥时 21:00-23:00
+};
+
+/**
+ * 时辰名称列表（含"时"后缀），用于匹配输入
+ */
+export const SHICHEN_NAMES: string[] = Object.keys(SHICHEN_MAP).map((name) => `${name}时`);
+
+/**
+ * 解析时间输入的结果
+ */
+export interface ParsedTimeResult {
+  /** 解析后的小时（24小时制） */
+  hour: number;
+  /** 解析后的分钟 */
+  minute: number;
+  /** 是否应跳过真太阳时修正（时辰输入时为 true） */
+  skipSolarTime: boolean;
+}
+
+/**
+ * 解析用户输入的时间字符串，支持三种格式：
+ * 1. 具体时间："14:30"、"14"
+ * 2. 时间范围："13-15"、"13-15点"、"13～15" → 取中间值
+ * 3. 时辰："丑时"、"午时" → 取中间值，且标记跳过真太阳时修正
+ *
+ * @param input - 用户输入的时间字符串
+ * @returns 解析后的时间结果
+ * @throws {Error} 当输入格式无法识别时抛出
+ */
+export function parseTimeInput(input: string): ParsedTimeResult {
+  const trimmed = input.trim();
+
+  // 1. 匹配时辰（如"丑时"、"午时"）
+  for (const [name, [start, end]] of Object.entries(SHICHEN_MAP)) {
+    const pattern = new RegExp(`^${name}时$`);
+    if (pattern.test(trimmed)) {
+      // 子时特殊处理：23-1，中间值取0点（即24:00 → 00:00）
+      let middleHour: number;
+      if (name === '子') {
+        middleHour = 0; // 子时 23:00-01:00，取 00:00
+      } else {
+        middleHour = Math.floor((start + end) / 2);
+      }
+      return { hour: middleHour, minute: 0, skipSolarTime: true };
+    }
+  }
+
+  // 2. 匹配时间范围（如"13-15"、"13-15点"、"13～15点"）
+  const rangeMatch = trimmed.match(/^(\d{1,2})\s*[-～~]\s*(\d{1,2})点?$/);
+  if (rangeMatch) {
+    const start = parseInt(rangeMatch[1], 10);
+    const end = parseInt(rangeMatch[2], 10);
+    if (start >= 0 && start <= 23 && end >= 0 && end <= 23 && start < end) {
+      const middleHour = Math.floor((start + end) / 2);
+      return { hour: middleHour, minute: 0, skipSolarTime: false };
+    }
+  }
+
+  // 3. 匹配具体时间（如"14:30"、"14"）
+  const timeMatch = trimmed.match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if (timeMatch) {
+    const hour = parseInt(timeMatch[1], 10);
+    const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+      return { hour, minute, skipSolarTime: false };
+    }
+  }
+
+  throw new Error(
+    `无法解析时间输入: "${input}"。支持的格式：具体时间(14:30)、时间范围(13-15)、时辰(丑时)`
+  );
+}
+
+/**
  * 计算儒略日（Julian Day）
  * 将公历日期转换为儒略日数，用于天文学计算。
  * 算法基于公历转儒略日的标准公式。
@@ -121,24 +212,23 @@ export function calculateEquationOfTime(julianDay: number): number {
 }
 
 /**
- * 将北京时间转换为真太阳时
- * 首先根据观测地经度将北京时间修正为地方平太阳时，
- * 再叠加均时差得到真太阳时。
+ * 将给定日期时间转换为真太阳时（返回 Date 对象版本）
  *
- * @param beijingTime 北京时间，格式为 YYYY-MM-DD HH:mm:ss
- * @param longitude 观测地经度（东经为正，西经为负）
- * @param _latitude 观测地纬度（北纬为正，南纬为负，当前算法保留参数但未使用）
- * @returns 真太阳时字符串，格式为 YYYY-MM-DD HH:mm:ss
- * @throws {Error} 当时间格式无效时抛出
+ * @param date - JavaScript Date 对象，表示北京时间
+ * @param longitude - 观测地点的经度（东经为正）
+ * @param _latitude - 观测地点的纬度（保留参数，当前未使用）
+ * @param useSolarTime - 是否启用真太阳时修正，默认 false 不修正
+ * @returns 真太阳时对应的 Date 对象；如果 useSolarTime 为 false，则返回原始 date 的副本
  */
-export function convertToApparentSolarTime(
-  beijingTime: string,
+export function convertToSolarTime(
+  date: Date,
   longitude: number,
   _latitude?: number,
-): string {
-  const date = new Date(beijingTime);
-  if (isNaN(date.getTime())) {
-    throw new Error('无效的时间格式，期望格式：YYYY-MM-DD HH:mm:ss');
+  useSolarTime: boolean = false,
+): Date {
+  // 如果不启用真太阳时修正，直接返回原始时间的副本
+  if (!useSolarTime) {
+    return new Date(date.getTime());
   }
 
   const julianDay = calculateJulianDay(date);
@@ -154,12 +244,5 @@ export function convertToApparentSolarTime(
     localMeanTime + equationOfTime * 60 * 1000,
   );
 
-  const year = apparentSolarTime.getFullYear();
-  const month = String(apparentSolarTime.getMonth() + 1).padStart(2, '0');
-  const day = String(apparentSolarTime.getDate()).padStart(2, '0');
-  const hours = String(apparentSolarTime.getHours()).padStart(2, '0');
-  const minutes = String(apparentSolarTime.getMinutes()).padStart(2, '0');
-  const seconds = String(apparentSolarTime.getSeconds()).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return apparentSolarTime;
 }
