@@ -11,23 +11,31 @@ import { handleError } from '../utils/errors.js';
 const AnalyzePalaceInputSchema = z.object({
   reconstructionKey: ReconstructionKeySchema,
   palace: PalaceQuerySchema,
-  hasStars: z.array(z.string()).optional(),
-  hasOneOfStars: z.array(z.string()).optional(),
-  notHaveStars: z.array(z.string()).optional(),
-  hasMutagen: z.string().optional(),
+  hasStars: z.array(z.string()).optional()
+    .describe("检查宫位中是否同时包含所有指定星耀（AND 逻辑）。星耀名如'紫微'、'左辅'等"),
+  hasOneOfStars: z.array(z.string()).optional()
+    .describe('检查宫位中是否包含任一指定星耀（OR 逻辑）'),
+  notHaveStars: z.array(z.string()).optional()
+    .describe('检查宫位中是否不包含指定星耀'),
+  hasMutagen: z.string().optional()
+    .describe("检查宫位中是否有指定四化。可选值：'禄'、'权'、'科'、'忌'"),
   isEmpty: z
     .object({
       excludeStars: z.array(z.string()).optional(),
     })
-    .optional(),
+    .optional()
+    .describe('检查宫位是否为空宫（无主星）。excludeStars 可排除特定星耀（如杂耀）'),
   fliesTo: z
     .object({
       to: PalaceQuerySchema,
       withMutagens: z.array(z.string()).min(1, 'withMutagens 不能为空数组'),
     })
-    .optional(),
-  selfMutaged: z.array(z.string()).min(1, 'selfMutaged 不能为空数组').optional(),
-  getMutagedPlaces: z.boolean().optional(),
+    .optional()
+    .describe('检查是否有星耀的四化飞入指定宫位。to=目标宫位名，withMutagens=四化类型列表'),
+  selfMutaged: z.array(z.string()).min(1, 'selfMutaged 不能为空数组').optional()
+    .describe("检查宫位内是否有星耀自化。传入四化类型列表，如['禄','忌']"),
+  getMutagedPlaces: z.boolean().optional()
+    .describe('若为 true，返回当前宫位星耀的四化飞入目标宫位列表'),
 });
 
 type AnalyzePalaceInput = z.infer<typeof AnalyzePalaceInputSchema>;
@@ -54,7 +62,7 @@ interface IExtendedPalace extends IPalaceInstance {
 export const analyzePalaceTool = {
   name: 'analyze_palace' as const,
   description:
-    '对指定宫位进行综合分析（星耀存在性、四化、空宫、飞化、自化）。reconstructionKey 从 get_astrolabe 响应中直接获取。',
+    '对指定宫位进行综合分析（星耀存在性、四化、空宫、飞化、自化）。reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。',
   inputSchema: AnalyzePalaceInputSchema,
   handler: async (input: AnalyzePalaceInput) => {
     try {

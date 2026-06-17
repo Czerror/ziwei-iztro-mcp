@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GenderSchema } from './astro.js';
+import { GenderSchema, DATE_DESCRIPTION } from './astro.js';
 
 /**
  * 星盘重建密钥 Schema（最小参数集，用于下游 Tool 重建星盘实例）
@@ -7,7 +7,7 @@ import { GenderSchema } from './astro.js';
  */
 export const ReconstructionKeySchema = z.object({
   dateType: z.enum(['solar', 'lunar']),
-  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D'),
+  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D').describe(DATE_DESCRIPTION),
   timeIndex: z.number().int().min(0).max(12),
   gender: GenderSchema,
   isLeapMonth: z.boolean().optional().default(false),

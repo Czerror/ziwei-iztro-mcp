@@ -26,7 +26,7 @@ type GetHoroscopeInput = z.infer<typeof GetHoroscopeInputSchema>;
 export const getHoroscopeTool = {
   name: 'get_horoscope' as const,
   description:
-    '基于 reconstructionKey 重建星盘并获取指定日期的运限信息（大限、小限、流年、流月、流日、流时）。reconstructionKey 从 get_astrolabe 响应中直接获取，无需手动构造。',
+    '基于 reconstructionKey 重建星盘并获取指定日期的运限信息（大限、小限、流年、流月、流日、流时）。reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。',
   inputSchema: GetHoroscopeInputSchema,
   handler: async (input: GetHoroscopeInput) => {
     try {

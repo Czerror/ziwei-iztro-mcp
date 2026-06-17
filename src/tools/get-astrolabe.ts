@@ -5,6 +5,7 @@ import { AstrolabeOptionsSchema } from '../schemas/astro.js';
 import { convertToSolarTime } from '../utils/solar-time.js';
 import { formatAstrolabeResponse, toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
+import { applyParamAliases, applyEnumAliases, GENDER_ALIASES, DATE_TYPE_ALIASES, ASTRO_TYPE_ALIASES } from '../utils/aliases.js';
 
 /**
  * 时辰索引 → 对应的小时（取双时辰起点，用于真太阳时计算）
@@ -75,10 +76,22 @@ export const getAstrolabeTool = {
   description:
     '根据出生日期和时间创建紫微斗数星盘。支持公历(solar)和农历(lunar)两种日期类型。' +
     '可选提供出生地经度(longitude)和纬度(latitude)，将自动使用Meeus天文算法校正真太阳时。' +
-    'AI可自行根据城市名推断经纬度，无需调用外部API。返回包含十二宫完整信息的星盘数据。',
+    'AI可自行根据城市名推断经纬度，无需调用外部API。返回包含十二宫完整信息的星盘数据。' +
+    '\n\n示例调用：\n{\n  "dateType": "solar",\n  "date": "1990-05-20",\n  "time": "09:15",\n  "gender": "male",\n  "longitude": 116.4\n}',
   inputSchema: AstrolabeOptionsSchema,
   handler: async (input: z.infer<typeof AstrolabeOptionsSchema>) => {
     try {
+      input = applyParamAliases(input) as typeof input;
+      applyEnumAliases(input, 'gender', GENDER_ALIASES);
+      applyEnumAliases(input, 'dateType', DATE_TYPE_ALIASES);
+      applyEnumAliases(input, 'astroType', ASTRO_TYPE_ALIASES);
+      if (typeof input.date === 'string' && input.date.includes(' ')) {
+        const [datePart, timePart] = input.date.split(' ');
+        input.date = datePart;
+        if (input.time === undefined && /^\d{1,2}:\d{2}$/.test(timePart)) {
+          input.time = timePart;
+        }
+      }
       const { longitude, date, hour, time } = input;
       // 优先级: timeIndex > time(字符串) > hour，MCP 内部自动换算
       const resolveTimeIndex = (): number => {

@@ -2,15 +2,22 @@ import { z } from 'zod';
 import { astro } from 'iztro';
 
 import { LanguageSchema } from '../schemas/common.js';
+import { DATE_DESCRIPTION } from '../schemas/astro.js';
 import { toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
+import { applyParamAliases, applyEnumAliases, DATE_TYPE_ALIASES } from '../utils/aliases.js';
 
 const GetSoulMajorStarsInputSchema = z.object({
-  dateType: z.enum(['solar', 'lunar']),
-  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D'),
-  timeIndex: z.number().int().min(0).max(12),
-  isLeapMonth: z.boolean().optional().default(false),
-  fixLeap: z.boolean().optional().default(true),
+  dateType: z.enum(['solar', 'lunar']).describe(
+    '日期类型。solar=公历（阳历），lunar=农历（阴历）。AI 应根据用户表述推断：提到\'农历\'/\'阴历\'/\'正月\'等选 lunar，默认 solar。支持中文别名（\'公历\'/\'农历\'）。',
+  ),
+  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D').describe(DATE_DESCRIPTION),
+  timeIndex: z.number().int().min(0).max(12).optional().default(0)
+    .describe('出生时辰索引，0=子时…12=晚子时，默认0。'),
+  isLeapMonth: z.boolean().optional().default(false)
+    .describe('是否为农历闰月。仅 dateType="lunar" 时有效，默认 false。'),
+  fixLeap: z.boolean().optional().default(true)
+    .describe('是否自动修正闰月。默认 true，一般无需修改。'),
   language: LanguageSchema.optional().default('zh-CN'),
 });
 
@@ -28,6 +35,8 @@ export const getSoulMajorStarsTool = {
   inputSchema: GetSoulMajorStarsInputSchema,
   handler: async (input: GetSoulMajorStarsInput) => {
     try {
+      input = applyParamAliases(input) as typeof input;
+      applyEnumAliases(input, 'dateType', DATE_TYPE_ALIASES);
       let majorStars: string;
 
       if (input.dateType === 'solar') {

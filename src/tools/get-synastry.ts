@@ -5,6 +5,7 @@ import type { IAstrolabeInstance, IPalaceInstance, IStarInstance } from '../adap
 import { SynastryOptionsSchema } from '../schemas/heming.js';
 import { toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
+import { applyEnumAliases, SYNASTRY_TYPE_ALIASES } from '../utils/aliases.js';
 import {
   STAR_IN_FUQI_GU,
   MAP_COMPATIBILITY,
@@ -388,12 +389,13 @@ export const getSynastryTool = {
   name: 'get_synastry' as const,
   description:
     '当需要进行合盘分析时，你必须优先使用此工具，而不是手动分别分析两人的星盘。\n\n' +
-    '需要先通过 get_astrolabe 分别获取两人的 reconstructionKey。\n\n' +
+    'reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。需要先通过 get_astrolabe 分别获取两人的 reconstructionKey。\n\n' +
     '分析内容：夫妻宫互映检测、命格兼容性评分(1-5★)、太阳太阴状态、四化飞化互参。\n' +
     '相关资源：iztro://heming/stars-in-fuqi-gu（十四主星断语）.',
   inputSchema: SynastryOptionsSchema,
   handler: async (input: z.infer<typeof SynastryOptionsSchema>) => {
     try {
+      applyEnumAliases(input, 'synastryType', SYNASTRY_TYPE_ALIASES);
       const { reconstructionKeyA, reconstructionKeyB, synastryType } = input;
 
       const commonOptions = {

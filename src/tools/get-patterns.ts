@@ -5,6 +5,7 @@ import type { IAstrolabeInstance, IPalaceInstance, IStarInstance } from '../adap
 import { ReconstructionKeySchema } from '../schemas/common.js';
 import { toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
+import { applyEnumAliases, PATTERN_CATEGORY_ALIASES } from '../utils/aliases.js';
 
 // ────────────────── 常量 ──────────────────
 const SHA_NAMES = ['擎羊', '陀罗', '火星', '铃星', '地空', '地劫'];
@@ -44,7 +45,8 @@ const GetPatternsInputSchema = z.object({
   category: z
     .enum(['all', 'superior', 'middle', 'support', 'caution', 'basic'])
     .optional()
-    .default('all'),
+    .default('all')
+    .describe("格局分类筛选。all=全部（41种），superior=上格（8种），middle=中格（9种），support=助力格（6种），caution=恶格（8种），basic=基础格（10种）。默认 all 返回全部。支持中文别名：'上格'/'中格'/'恶格'/'基础格'。"),
 });
 
 type GetPatternsInput = z.infer<typeof GetPatternsInputSchema>;
@@ -1370,11 +1372,12 @@ export const getPatternsTool = {
   description:
     '"命格"、"格局"、"分析星盘"、"详细分析"等相关问题时，你必须优先使用此工具，而不是从星盘数据中手动推断格局。\n\n' +
     '支持检测41种格局：上格8种(君臣庆会/紫府同宫等)、中格9种、助力格6种、恶格8种(羊陀夹忌等)、基础格10种。\n' +
-    '需要 reconstructionKey（从 get_astrolabe 获取），可通过 category 参数筛选特定分类。\n' +
+    'reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。可通过 category 参数筛选特定分类。\n' +
     '相关资源：iztro://patterns/knowledge（格局详细知识卡片）.',
   inputSchema: GetPatternsInputSchema,
   handler: async (input: GetPatternsInput) => {
     try {
+      applyEnumAliases(input, 'category', PATTERN_CATEGORY_ALIASES);
       const { reconstructionKey, category } = input;
       const astrolabe = createAstrolabe({
         ...reconstructionKey,

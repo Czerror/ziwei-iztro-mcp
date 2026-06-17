@@ -16,7 +16,9 @@ export const ScopeSchema = z.enum(['origin', 'decadal', 'yearly']);
  * 使用 string 类型以兼容 OpenAI function calling 规范（避免 anyOf）。
  * 若传入纯数字字符串（如 "3"），适配层会自动解析为宫位索引。
  */
-export const PalaceQuerySchema = z.string().min(1, '宫位查询参数不能为空');
+export const PalaceQuerySchema = z.string()
+  .min(1, '宫位查询参数不能为空')
+  .describe("宫位名称或索引。支持：'命宫'、'兄弟'、'夫妻'、'子女'、'财帛'、'疾厄'、'迁移'、'交友'、'官禄'、'田宅'、'福德'、'父母'。也可传数字 0-11。");
 
 /** 宫位索引类型 */
 export type PalaceIndex = z.infer<typeof PalaceIndexSchema>;

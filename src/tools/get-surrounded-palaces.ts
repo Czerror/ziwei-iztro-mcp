@@ -59,7 +59,7 @@ function resolvePalaceIndex(astrolabe: IAstrolabeInstance, query: string): numbe
 export const getSurroundedPalacesTool = {
   name: 'get_surrounded_palaces' as const,
   description:
-    '获取指定宫位的三方四正宫位数据（本宫、对宫、财帛位、官禄位），每个宫位包含完整的星耀和四化信息。reconstructionKey 从 get_astrolabe 响应中直接获取。',
+    '获取指定宫位的三方四正宫位数据（本宫、对宫、财帛位、官禄位），每个宫位包含完整的星耀和四化信息。reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。',
   inputSchema: GetSurroundedPalacesInputSchema,
   handler: async (input: GetSurroundedPalacesInput) => {
     try {

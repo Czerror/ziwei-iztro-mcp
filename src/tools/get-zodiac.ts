@@ -2,11 +2,13 @@ import { z } from 'zod';
 import { astro } from 'iztro';
 
 import { LanguageSchema } from '../schemas/common.js';
+import { DATE_DESCRIPTION } from '../schemas/astro.js';
 import { toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
+import { applyParamAliases } from '../utils/aliases.js';
 
 const GetZodiacInputSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D'),
+  date: z.string().regex(/^\d{4}-\d{1,2}-\d{1,2}$/, '日期格式必须为 YYYY-M-D').describe(DATE_DESCRIPTION),
   language: LanguageSchema.optional().default('zh-CN'),
 });
 
@@ -23,6 +25,7 @@ export const getZodiacTool = {
   inputSchema: GetZodiacInputSchema,
   handler: async (input: GetZodiacInput) => {
     try {
+      input = applyParamAliases(input) as typeof input;
       const zodiac = astro.getZodiacBySolarDate(input.date, input.language);
       const result = { zodiac, date: input.date };
 

@@ -8,7 +8,8 @@ import { handleError } from '../utils/errors.js';
 
 const GetStarInfoInputSchema = z.object({
   reconstructionKey: ReconstructionKeySchema,
-  starName: z.string().min(1, '星耀名称不能为空'),
+  starName: z.string().min(1, '星耀名称不能为空')
+    .describe('星耀名称。支持 14 主星（紫微/天机/太阳/武曲/天同/廉贞/天府/太阴/贪狼/巨门/天相/天梁/七杀/破军）、辅星（左辅/右弼/文昌/文曲/天魁/天钺/禄存/天马）、煞星（擎羊/陀罗/火星/铃星/地空/地劫）等。'),
 });
 
 type GetStarInfoInput = z.infer<typeof GetStarInfoInputSchema>;
@@ -65,7 +66,7 @@ function getSurroundedPalaceNames(astrolabe: IAstrolabeInstance, index: number):
 export const getStarInfoTool = {
   name: 'get_star_info' as const,
   description:
-    '获取指定星耀在星盘中的详细信息（亮度、四化、所在宫位、三方四正）。reconstructionKey 从 get_astrolabe 响应中直接获取。',
+    '获取指定星耀在星盘中的详细信息（亮度、四化、所在宫位、三方四正）。reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。',
   inputSchema: GetStarInfoInputSchema,
   handler: async (input: GetStarInfoInput) => {
     try {

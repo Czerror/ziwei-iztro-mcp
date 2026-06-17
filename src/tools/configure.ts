@@ -12,11 +12,16 @@ const ALGORITHM_OPTIONS = ['default', 'zhongzhou'] as const;
 const ConfigureInputSchema = z.object({
   mutagens: z.record(z.string(), z.array(z.string())).optional(),
   brightness: z.record(z.string(), z.array(z.string())).optional(),
-  yearDivide: z.enum(GROUPS_DIVIDE_OPTIONS).optional(),
-  horoscopeDivide: z.enum(GROUPS_DIVIDE_OPTIONS).optional(),
-  ageDivide: z.enum(AGE_DIVIDE_OPTIONS).optional(),
-  dayDivide: z.enum(DAY_DIVIDE_OPTIONS).optional(),
-  algorithm: z.enum(ALGORITHM_OPTIONS).optional(),
+  yearDivide: z.enum(GROUPS_DIVIDE_OPTIONS).optional()
+    .describe('年分界点。normal=正月初一，exact=立春（精确分界）'),
+  horoscopeDivide: z.enum(GROUPS_DIVIDE_OPTIONS).optional()
+    .describe('运限分界点。normal=正月初一，exact=立春'),
+  ageDivide: z.enum(AGE_DIVIDE_OPTIONS).optional()
+    .describe('小限分界点。normal=正月初一，birthday=生日当天'),
+  dayDivide: z.enum(DAY_DIVIDE_OPTIONS).optional()
+    .describe('晚子时处理。current=当天，forward=次日'),
+  algorithm: z.enum(ALGORITHM_OPTIONS).optional()
+    .describe('安星算法。default=默认，zhongzhou=中州派'),
   useSolarTime: z
     .boolean()
     .optional()

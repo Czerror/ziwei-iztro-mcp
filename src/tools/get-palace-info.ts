@@ -23,7 +23,7 @@ type GetPalaceInfoInput = z.infer<typeof GetPalaceInfoInputSchema>;
 export const getPalaceInfoTool = {
   name: 'get_palace_info' as const,
   description:
-    '获取星盘中指定宫位的详细信息（主星、辅星、杂耀、四化、天干地支、长生十二神等）。reconstructionKey 从 get_astrolabe 响应中直接获取。',
+    '获取星盘中指定宫位的详细信息（主星、辅星、杂耀、四化、天干地支、长生十二神等）。reconstructionKey 必须从 get_astrolabe 响应中直接复制，不要手动构造或修改其内容。',
   inputSchema: GetPalaceInfoInputSchema,
   handler: async (input: GetPalaceInfoInput) => {
     try {
