@@ -39,10 +39,26 @@ export const HemingStarQuerySchema = z.object({
   starName: MajorStarNameSchema.describe('十四主星名称，如"紫微"、"天府"'),
 });
 
-/** 宫位类型枚举 */
-export const PalaceTypeSchema = z
-  .enum(['fuqi', 'ming', 'caibo', 'guanlu', 'fude'])
-  .describe('宫位类型：fuqi=夫妻宫, ming=命宫, caibo=财帛宫, guanlu=官禄宫, fude=福德宫');
+/** 中文宫位名 → 拼音码 映射表 */
+const PALACE_CHINESE_TO_KEY: Record<string, string> = {
+  '夫妻宫': 'fuqi', '夫妻': 'fuqi',
+  '命宫': 'ming',
+  '财帛宫': 'caibo', '财帛': 'caibo',
+  '官禄宫': 'guanlu', '官禄': 'guanlu',
+  '福德宫': 'fude', '福德': 'fude',
+};
+
+/** 宫位类型枚举 — 同时接受中文名（如"夫妻宫"）和拼音码（如"fuqi"） */
+export const PalaceTypeSchema = z.preprocess(
+  (val: unknown) => {
+    if (typeof val === 'string') {
+      return PALACE_CHINESE_TO_KEY[val] ?? val;
+    }
+    return val;
+  },
+  z.enum(['fuqi', 'ming', 'caibo', 'guanlu', 'fude'])
+    .describe('宫位类型：fuqi=夫妻宫, ming=命宫, caibo=财帛宫, guanlu=官禄宫, fude=福德宫'),
+);
 
 /**
  * 宫位星耀断语查询 Schema
