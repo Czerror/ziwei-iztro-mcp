@@ -1,6 +1,10 @@
 import { data } from 'iztro';
 import {
   STAR_IN_FUQI_GU,
+  STAR_IN_MING_GU,
+  STAR_IN_CAI_BO_GU,
+  STAR_IN_GUAN_LU_GU,
+  STAR_IN_FU_DE_GU,
   SIHUA_IN_FUQI_GU,
   HEMING_METHODOLOGY,
   MARRIAGE_STARS_BRIEF,
@@ -14,20 +18,20 @@ const { LANGUAGES, HEAVENLY_STEMS, EARTHLY_BRANCHES, CHINESE_TIME, TIME_RANGE, P
 /** 星耀常量数据（硬编码，避免依赖 iztro 内部结构） */
 const STAR_CATALOG = {
   majorStars: [
-    { key: 'ziweiMaj', nameZH: '紫微', nameEN: 'Emperor', fiveElements: '土', yinYang: '阴' },
-    { key: 'tianjiMaj', nameZH: '天机', nameEN: 'Oracle', fiveElements: '木', yinYang: '阴' },
-    { key: 'taiyangMaj', nameZH: '太阳', nameEN: 'Sun', fiveElements: '火', yinYang: '阳' },
-    { key: 'wuquMaj', nameZH: '武曲', nameEN: 'Finance', fiveElements: '金', yinYang: '阴' },
-    { key: 'tiantongMaj', nameZH: '天同', nameEN: 'Sympathy', fiveElements: '水', yinYang: '阳' },
-    { key: 'lianzhenMaj', nameZH: '廉贞', nameEN: 'Integrity', fiveElements: '火', yinYang: '阴' },
-    { key: 'tianfuMaj', nameZH: '天府', nameEN: 'Empress', fiveElements: '土', yinYang: '阳' },
-    { key: 'taiyinMaj', nameZH: '太阴', nameEN: 'Moon', fiveElements: '水', yinYang: '阴' },
-    { key: 'tanlangMaj', nameZH: '贪狼', nameEN: 'Desire', fiveElements: '水', yinYang: '阳' },
-    { key: 'jumenMaj', nameZH: '巨门', nameEN: 'GreatGate', fiveElements: '土', yinYang: '阴' },
-    { key: 'tianxiangMaj', nameZH: '天相', nameEN: 'Minister', fiveElements: '水', yinYang: '阳' },
-    { key: 'tianliangMaj', nameZH: '天梁', nameEN: 'Blessing', fiveElements: '土', yinYang: '阳' },
-    { key: 'qishaMaj', nameZH: '七杀', nameEN: 'Power', fiveElements: '金', yinYang: '阳' },
-    { key: 'pojunMaj', nameZH: '破军', nameEN: 'Ruin', fiveElements: '水', yinYang: '阴' },
+    { key: 'ziweiMaj', nameZH: '紫微', nameEN: 'Emperor', fiveElements: '土', yinYang: '阴', nature: '中性偏吉', keywords: '帝王·尊贵·独立' },
+    { key: 'tianjiMaj', nameZH: '天机', nameEN: 'Oracle', fiveElements: '木', yinYang: '阴', nature: '吉星', keywords: '智慧·机变·谋略' },
+    { key: 'taiyangMaj', nameZH: '太阳', nameEN: 'Sun', fiveElements: '火', yinYang: '阳', nature: '吉星', keywords: '阳刚·官贵·慷慨' },
+    { key: 'wuquMaj', nameZH: '武曲', nameEN: 'Finance', fiveElements: '金', yinYang: '阴', nature: '中性', keywords: '财富·刚毅·果断' },
+    { key: 'tiantongMaj', nameZH: '天同', nameEN: 'Sympathy', fiveElements: '水', yinYang: '阳', nature: '吉星', keywords: '温和·享福·随缘' },
+    { key: 'lianzhenMaj', nameZH: '廉贞', nameEN: 'Integrity', fiveElements: '火', yinYang: '阴', nature: '凶中带吉', keywords: '才艺·刑囚·桃花' },
+    { key: 'tianfuMaj', nameZH: '天府', nameEN: 'Empress', fiveElements: '土', yinYang: '阳', nature: '吉星', keywords: '财库·稳重·保守' },
+    { key: 'taiyinMaj', nameZH: '太阴', nameEN: 'Moon', fiveElements: '水', yinYang: '阴', nature: '吉星', keywords: '柔美·财富·阴柔' },
+    { key: 'tanlangMaj', nameZH: '贪狼', nameEN: 'Desire', fiveElements: '水', yinYang: '阳', nature: '中性', keywords: '欲望·桃花·多才' },
+    { key: 'jumenMaj', nameZH: '巨门', nameEN: 'GreatGate', fiveElements: '土', yinYang: '阴', nature: '凶中带吉', keywords: '口舌·是非·善辩' },
+    { key: 'tianxiangMaj', nameZH: '天相', nameEN: 'Minister', fiveElements: '水', yinYang: '阳', nature: '吉星', keywords: '辅佐·行政·印绶' },
+    { key: 'tianliangMaj', nameZH: '天梁', nameEN: 'Blessing', fiveElements: '土', yinYang: '阳', nature: '吉星', keywords: '荫护·医药·长辈' },
+    { key: 'qishaMaj', nameZH: '七杀', nameEN: 'Power', fiveElements: '金', yinYang: '阳', nature: '凶星', keywords: '将星·果决·孤克' },
+    { key: 'pojunMaj', nameZH: '破军', nameEN: 'Ruin', fiveElements: '水', yinYang: '阴', nature: '凶星', keywords: '开创·变动·破坏' },
   ],
   minorStars: {
     soft: [
@@ -196,9 +200,49 @@ export const RESOURCES = [
    description:
      '紫微斗数合盘知识库：十四主星（紫微、天机、太阳、武曲、天同、廉贞、天府、太阴、贪狼、巨门、天相、天梁、七杀、破军）在夫妻宫的完整断语。' +
      '每颗星包含：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、配偶外形性格(spouseTraits)、婚期建议(timing)、倪海夏原话(niQuote)。' +
-     '当进行合盘分析需要解读某颗星在夫妻宫的含义时，应查阅此资源。可通过 get_heming_star 工具按星名查询单条，也可直接读取本资源获取全部。',
+     '当进行合盘分析需要解读某颗星在夫妻宫的含义时，应查阅此资源。可通过 get_star_in_palace 工具按星名查询单条，也可直接读取本资源获取全部。',
    mimeType: 'application/json' as const,
    data: STAR_IN_FUQI_GU,
+ },
+ {
+   name: 'stars-in-ming-gong' as const,
+   uri: 'iztro://palace/ming-gong-stars' as const,
+   description:
+     '紫微斗数命宫断语知识库：十四主星在命宫的完整断语（倪海夏《天纪》体系）。' +
+     '每颗星包含：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、倪海夏原话(niQuote)。' +
+     '命宫代表自身性格、命格基调、一生运势方向。当分析命宫主星含义时，应查阅此资源。',
+   mimeType: 'application/json' as const,
+   data: STAR_IN_MING_GU,
+ },
+ {
+   name: 'stars-in-caibo-gong' as const,
+   uri: 'iztro://palace/caibo-gong-stars' as const,
+   description:
+     '紫微斗数财帛宫断语知识库：十四主星在财帛宫的完整断语（倪海夏《天纪》体系）。' +
+     '每颗星包含：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、倪海夏原话(niQuote)。' +
+     '财帛宫代表财运模式、理财风格、赚钱能力、破财风险。当分析财帛宫主星含义时，应查阅此资源。',
+   mimeType: 'application/json' as const,
+   data: STAR_IN_CAI_BO_GU,
+ },
+ {
+   name: 'stars-in-guanlu-gong' as const,
+   uri: 'iztro://palace/guanlu-gong-stars' as const,
+   description:
+     '紫微斗数官禄宫断语知识库：十四主星在官禄宫的完整断语（倪海夏《天纪》体系）。' +
+     '每颗星包含：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、倪海夏原话(niQuote)。' +
+     '官禄宫代表事业方向、职场表现、适合行业、升迁机会。当分析官禄宫主星含义时，应查阅此资源。',
+   mimeType: 'application/json' as const,
+   data: STAR_IN_GUAN_LU_GU,
+ },
+ {
+   name: 'stars-in-fude-gong' as const,
+   uri: 'iztro://palace/fude-gong-stars' as const,
+   description:
+     '紫微斗数福德宫断语知识库：十四主星在福德宫的完整断语（倪海夏《天纪》体系）。' +
+     '每颗星包含：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、倪海夏原话(niQuote)。' +
+     '福德宫代表精神世界、享福能力、晚年运势、内心状态。当分析福德宫主星含义时，应查阅此资源。',
+   mimeType: 'application/json' as const,
+   data: STAR_IN_FU_DE_GU,
  },
  {
    name: 'sihua-in-fuqi-gu' as const,

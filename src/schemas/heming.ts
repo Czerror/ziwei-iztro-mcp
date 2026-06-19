@@ -39,6 +39,27 @@ export const HemingStarQuerySchema = z.object({
   starName: MajorStarNameSchema.describe('十四主星名称，如"紫微"、"天府"'),
 });
 
+/** 宫位类型枚举 */
+export const PalaceTypeSchema = z
+  .enum(['fuqi', 'ming', 'caibo', 'guanlu', 'fude'])
+  .describe('宫位类型：fuqi=夫妻宫, ming=命宫, caibo=财帛宫, guanlu=官禄宫, fude=福德宫');
+
+/**
+ * 宫位星耀断语查询 Schema
+ */
+export const PalaceStarQuerySchema = z.object({
+  /** 十四主星名称 */
+  starName: MajorStarNameSchema.describe('十四主星名称，如"紫微"、"天府"'),
+  /** 宫位类型 */
+  palaceType: PalaceTypeSchema.describe('宫位类型：fuqi（夫妻宫）、ming（命宫）、caibo（财帛宫）、guanlu（官禄宫）、fude（福德宫）'),
+});
+
+/** 宫位类型 */
+export type PalaceType = z.infer<typeof PalaceTypeSchema>;
+
+/** 宫位星耀断语查询类型 */
+export type PalaceStarQuery = z.infer<typeof PalaceStarQuerySchema>;
+
 /** 合盘类型 */
 export type SynastryType = z.infer<typeof SynastryTypeSchema>;
 

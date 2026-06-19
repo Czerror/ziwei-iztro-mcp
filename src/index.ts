@@ -19,7 +19,7 @@ import { getPatternsTool } from './tools/get-patterns.js';
 import { RESOURCES } from './resources/index.js';
 import { toJSON } from './utils/format.js';
 
-/** 所有 14 个 Tool 定义 */
+/** 所有 Tool 定义 */
 const ALL_TOOLS = [
   getAstrolabeTool,
   getHoroscopeTool,

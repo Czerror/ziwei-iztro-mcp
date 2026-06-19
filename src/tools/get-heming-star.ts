@@ -1,29 +1,59 @@
 import { z } from 'zod';
 
-import { STAR_IN_FUQI_GU } from '../resources/heming-knowledge.js';
-import { HemingStarQuerySchema } from '../schemas/heming.js';
+import {
+  STAR_IN_FUQI_GU,
+  STAR_IN_MING_GU,
+  STAR_IN_CAI_BO_GU,
+  STAR_IN_GUAN_LU_GU,
+  STAR_IN_FU_DE_GU,
+  type StarPalacePhrase,
+} from '../resources/heming-knowledge.js';
+import { PalaceStarQuerySchema } from '../schemas/heming.js';
 import { toJSON } from '../utils/format.js';
 import { handleError } from '../utils/errors.js';
 
+const PALACE_DATA: Record<string, Record<string, StarPalacePhrase>> = {
+  fuqi: STAR_IN_FUQI_GU,
+  ming: STAR_IN_MING_GU,
+  caibo: STAR_IN_CAI_BO_GU,
+  guanlu: STAR_IN_GUAN_LU_GU,
+  fude: STAR_IN_FU_DE_GU,
+};
+
+const PALACE_LABELS: Record<string, string> = {
+  fuqi: '夫妻宫',
+  ming: '命宫',
+  caibo: '财帛宫',
+  guanlu: '官禄宫',
+  fude: '福德宫',
+};
+
 /**
- * get_heming_star Tool — 查询特定主星在夫妻宫的合盘断语
+ * get_star_in_palace Tool — 查询十四主星在指定宫位的倪海夏断语
  *
- * 根据十四主星名称，返回该星耀在夫妻宫时的完整断语，
- * 包括核心总结、吉凶条件、配偶特征、婚期建议等。
+ * 根据十四主星名称和宫位类型，返回该星耀在对应宫位的完整断语。
+ * 夫妻宫额外包含配偶外形性格(spouseTraits)和婚期建议(timing)。
  * 此工具不依赖具体星盘，仅返回知识库中的标准断语。
  */
 export const getHemingStarTool = {
-  name: 'get_heming_star' as const,
+  name: 'get_star_in_palace' as const,
   description:
-    '当需要分析夫妻宫时，你必须优先使用此工具。\n\n' +
-    '不需要星盘，可直接查询。覆盖全部14主星。\n' +
-    '返回：核心总结、吉象条件、凶象注意事项、配偶外形性格、婚期建议。\n' +
-    '相关资源：iztro://heming/stars-in-fuqi-gu（十四主星断语）.',
-  inputSchema: HemingStarQuerySchema,
-  handler: async (input: z.infer<typeof HemingStarQuerySchema>) => {
+    '查询十四主星在指定宫位（夫妻宫/命宫/财帛宫/官禄宫/福德宫）的倪海夏断语。\n\n' +
+    '不需要星盘，可直接查询。覆盖全部14主星×5宫位。\n' +
+    '统一返回：核心总结(summary)、吉象条件(good)、凶象注意事项(bad)、倪海夏原话(niQuote?)。\n' +
+    '夫妻宫额外包含：配偶外形性格(spouseTraits?)、婚期建议(timing?)。\n' +
+    '相关资源：\n' +
+    '- iztro://heming/stars-in-fuqi-gu（夫妻宫断语）\n' +
+    '- iztro://palace/ming-gong-stars（命宫断语）\n' +
+    '- iztro://palace/caibo-gong-stars（财帛宫断语）\n' +
+    '- iztro://palace/guanlu-gong-stars（官禄宫断语）\n' +
+    '- iztro://palace/fude-gong-stars（福德宫断语）',
+  inputSchema: PalaceStarQuerySchema,
+  handler: async (input: z.infer<typeof PalaceStarQuerySchema>) => {
     try {
-      const { starName } = input;
-      const phrase = STAR_IN_FUQI_GU[starName];
+      const { starName, palaceType } = input;
+      const dataMap = PALACE_DATA[palaceType];
+      const phrase = dataMap?.[starName] ?? null;
 
       if (!phrase) {
         return {
@@ -32,7 +62,7 @@ export const getHemingStarTool = {
               type: 'text' as const,
               text: toJSON({
                 error: 'NOT_FOUND',
-                message: `未找到主星 "${starName}" 在夫妻宫的断语数据`,
+                message: `未找到主星 "${starName}" 在${PALACE_LABELS[palaceType] ?? palaceType}的断语数据`,
               }),
             },
           ],
@@ -42,19 +72,14 @@ export const getHemingStarTool = {
 
       const result = {
         starName,
-        phrase: {
-          summary: phrase.summary,
-          good: phrase.good,
-          bad: phrase.bad,
-          spouseTraits: phrase.spouseTraits,
-          timing: phrase.timing,
-          ...(phrase.niQuote !== undefined && { niQuote: phrase.niQuote }),
-        },
+        palaceType,
+        palaceLabel: PALACE_LABELS[palaceType] ?? palaceType,
+        phrase,
       };
 
       return { content: [{ type: 'text' as const, text: toJSON(result) }] };
     } catch (error: unknown) {
-      return handleError(error, 'get_heming_star');
+      return handleError(error, 'get_star_in_palace');
     }
   },
 };
