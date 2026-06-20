@@ -75,6 +75,7 @@ export const getStarInfoTool = {
         ...reconstructionKey,
         fixLeap: true,
         astroType: 'heaven',
+        useSolarTime: false,
       });
       const found = findStarInPalaces(astrolabe, starName);
 

@@ -32,6 +32,7 @@ export const getPalaceInfoTool = {
         ...reconstructionKey,
         fixLeap: true,
         astroType: 'heaven',
+        useSolarTime: false,
       });
       const palace = getPalaceInfo(astrolabe, palaceQuery);
 

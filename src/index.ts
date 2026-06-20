@@ -16,6 +16,8 @@ import { convertSolarTimeTool } from './tools/convert-solar-time.js';
 import { getSynastryTool } from './tools/get-synastry.js';
 import { getHemingStarTool } from './tools/get-heming-star.js';
 import { getPatternsTool } from './tools/get-patterns.js';
+import { getWesternAstrolabeTool } from './tools/get-western-astrolabe.js';
+import { getWesternScopeTool } from './tools/get-western-scope.js';
 import { RESOURCES } from './resources/index.js';
 import { toJSON } from './utils/format.js';
 
@@ -35,6 +37,8 @@ const ALL_TOOLS = [
   getSynastryTool,
   getHemingStarTool,
   getPatternsTool,
+  getWesternAstrolabeTool,
+  getWesternScopeTool,
 ] as const;
 
 /**

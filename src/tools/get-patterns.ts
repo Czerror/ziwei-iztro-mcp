@@ -1383,6 +1383,7 @@ export const getPatternsTool = {
         ...reconstructionKey,
         fixLeap: true,
         astroType: 'heaven',
+        useSolarTime: false,
       });
 
       const results: PatternResult[] = [];

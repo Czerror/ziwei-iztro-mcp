@@ -402,6 +402,7 @@ export const getSynastryTool = {
         fixLeap: true as const,
         language: 'zh-CN' as const,
         astroType: 'heaven' as const,
+        useSolarTime: false as const,
       };
 
       const astrolabeA = createAstrolabe({ ...reconstructionKeyA, ...commonOptions });

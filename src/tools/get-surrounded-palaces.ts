@@ -68,6 +68,7 @@ export const getSurroundedPalacesTool = {
         ...reconstructionKey,
         fixLeap: true,
         astroType: 'heaven',
+        useSolarTime: false,
       });
       const index = resolvePalaceIndex(astrolabe, palaceQuery);
       const indices = getSurroundedIndices(index);

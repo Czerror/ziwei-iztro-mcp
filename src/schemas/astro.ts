@@ -63,6 +63,8 @@ export const AstrolabeOptionsSchema = z.object({
     .describe('出生地经度（东经为正，西经为负）。AI 应根据用户提供的城市名自行推断，如北京≈116.4、上海≈121.5、台北≈121.6。'),
   latitude: z.number().min(-90).max(90).optional()
     .describe('出生地纬度（北纬为正，南纬为负）。AI 应根据用户提供的城市名自行推断，如北京≈39.9、上海≈31.2、台北≈25.0。'),
+  useSolarTime: z.boolean().optional().default(false)
+    .describe('是否启用真太阳时校准。默认false。当用户明确要求真太阳时校准时设为true'),
   birthplace: z.string().optional().describe(
     '出生地（仅供参考，不参与服务端计算）。AI 应根据此城市名自行推断经纬度，并通过 longitude/latitude 参数传入。',
   ),

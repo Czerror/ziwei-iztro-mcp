@@ -35,6 +35,7 @@ export const getHoroscopeTool = {
         ...reconstructionKey,
         fixLeap: true,
         astroType: 'heaven',
+        useSolarTime: false,
       });
       const result = createHoroscope(astrolabe, targetDate, targetTimeIndex);
 

@@ -67,15 +67,15 @@ function buildPreciseBeijingTime(date: string, time?: string, hour?: number, tim
  * 这是所有后续查询的基础 Tool。返回完整星盘数据，
  * 附加原始 timeIndex 供下游 Tool 重建星盘实例。
  *
- * 当提供 longitude 参数时，会自动使用 Meeus 天文算法将北京时间
- * 转换为出生地真太阳时，并据此调整时辰索引。无需外部 API。
+ * 当 useSolarTime 为 true 且提供 longitude 参数时，会使用 Meeus 天文算法
+ * 将北京时间转换为出生地真太阳时，并据此调整时辰索引。无需外部 API。
  * AI 可根据用户提供的城市名自行推断经纬度（如北京≈116.4, 上海≈121.5）。
  */
 export const getAstrolabeTool = {
   name: 'get_astrolabe' as const,
   description:
     '根据出生日期和时间创建紫微斗数星盘。支持公历(solar)和农历(lunar)两种日期类型。' +
-    '可选提供出生地经度(longitude)和纬度(latitude)，将自动使用Meeus天文算法校正真太阳时。' +
+    '可选提供出生地经度(longitude)和纬度(latitude)。当 useSolarTime 设为 true 时，将使用Meeus天文算法校正真太阳时。' +
     'AI可自行根据城市名推断经纬度，无需调用外部API。返回包含十二宫完整信息的星盘数据。' +
     '\n\n示例调用：\n{\n  "dateType": "solar",\n  "date": "1990-05-20",\n  "time": "09:15",\n  "gender": "male",\n  "longitude": 116.4\n}',
   inputSchema: AstrolabeOptionsSchema,
@@ -107,7 +107,7 @@ export const getAstrolabeTool = {
       let effectiveTimeIndex = rawTimeIndex;
       let solarTimeResult: Record<string, unknown> | null = null;
 
-      if (longitude !== undefined) {
+      if (longitude !== undefined && input.useSolarTime === true) {
         const beijingTime = buildPreciseBeijingTime(date, time, hour, rawTimeIndex);
         const beijingDate = new Date(beijingTime);
         const solarDate = convertToSolarTime(beijingDate, longitude, input.latitude, true);
