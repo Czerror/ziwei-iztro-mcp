@@ -34,7 +34,7 @@ export const WesternAstrolabeOptionsSchema = z.object({
 
 /** 西方星盘运限分析输入 Schema（继承出生参数 + 目标日期） */
 export const WesternScopeOptionsSchema = WesternAstrolabeOptionsSchema.extend({
-  scopeType: z.enum(['transit']).default('transit').describe('运限类型：当前仅支持 transit=行运'),
+  scopeType: z.enum(['transit', 'solar_return', 'secondary_progression']).default('transit').describe('运限类型：transit=行运, solar_return=日返盘, secondary_progression=次限推进'),
   targetYear: z.number().int().min(1900).max(2200).describe('目标年份'),
   targetMonth: z.number().int().min(1).max(12).describe('目标月份'),
   targetDay: z.number().int().min(1).max(31).describe('目标日'),

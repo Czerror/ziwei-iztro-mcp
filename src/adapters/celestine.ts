@@ -13,10 +13,15 @@ import {
   CelestialBody,
   calculateChart,
   calculatePlanets,
+  calculateProgression,
   calculateTransits,
   time,
   type ChartPlanet,
   type NatalPoint,
+  type ProgressedAspect,
+  type ProgressedChart,
+  type ProgressedPlanet,
+  type ProgressionBirthData,
   type Transit,
 } from 'celestine';
 import { convertToSolarTime } from '../utils/solar-time.js';
@@ -145,7 +150,11 @@ const MIN_VALID_LONGITUDE = -360;
 
 /** 技术限制声明 */
 const TECH_LIMIT_NOTICE =
-  '技术限制：未计算太阳返照、次限推进、太阳弧、返照宫位、主限或法达，不得把这些未写入的技术当作证据。';
+  '技术限制：未计算太阳返照、太阳弧、返照宫位、主限或法达，不得把这些未写入的技术当作证据。';
+
+/** 日返盘未实现提示 */
+const SOLAR_RETURN_NOTICE =
+  '日返盘（Solar Return）功能尚未实现：celestine 库暂不提供日返盘计算 API。请改用 transit（行运）或 secondary_progression（次限推进）进行分析。';
 
 /** 12宫名称映射 */
 const HOUSE_NAME_MAP: Record<number, string> = {
@@ -821,19 +830,30 @@ function buildNatalSummary(data: WesternAstrolabeData): WesternNatalSummary {
 }
 
 // ============================================================================
-// 核心导出：行运分析
+// 核心导出：运限分析（行运 / 日返 / 次限）
 // ============================================================================
 
 /**
- * 生成西方占星行运分析
+ * 生成西方占星运限分析
  *
- * 基于本命盘计算指定日期的行运行星相位与行运落宫。
- * 内部先生成本命盘，再进行行运计算。
+ * 根据 scopeType 分发到对应的计算逻辑：
+ * - transit: 行运分析（celestine calculateTransits）
+ * - solar_return: 日返盘（暂未实现，返回提示信息）
+ * - secondary_progression: 次限推进（celestine calculateProgression）
  *
- * @param options 行运分析输入（含完整出生参数 + 目标日期）
- * @returns 行运分析数据，含本命盘精简摘要
+ * @param options 运限分析输入（含完整出生参数 + 目标日期 + scopeType）
+ * @returns 运限分析数据，含本命盘精简摘要
  */
 export function generateWesternScope(options: WesternScopeOptions): WesternScopeData {
+  const scopeType = options.scopeType ?? 'transit';
+  if (scopeType === 'solar_return') {
+    return buildSolarReturnScope(options);
+  }
+  if (scopeType === 'secondary_progression') {
+    return buildSecondaryProgressionScope(options);
+  }
+
+  // === transit 行运分析（原有逻辑） ===
   const natalData = generateWesternAstrolabe(options as WesternAstrolabeOptions);
 
   validateSolarDate(options.targetYear, options.targetMonth, options.targetDay);
@@ -871,12 +891,160 @@ export function generateWesternScope(options: WesternScopeOptions): WesternScope
 
   return {
     natalSummary,
-    scopeType: options.scopeType ?? 'transit',
+    scopeType,
     targetDate,
     anchorDateTime,
     houseRulerChain,
     transitAspects,
     transitHouses,
     limitationNotice: TECH_LIMIT_NOTICE,
+  };
+}
+
+// ============================================================================
+// 运限类型辅助函数
+// ============================================================================
+
+/**
+ * 日返盘（Solar Return）占位函数
+ *
+ * celestine 库暂不提供日返盘计算 API，返回明确提示信息。
+ * 同时提供本命盘精简摘要供 AI 参考。
+ *
+ * @param options 运限分析输入
+ * @returns 含提示信息的运限分析数据
+ */
+function buildSolarReturnScope(options: WesternScopeOptions): WesternScopeData {
+  const natalData = generateWesternAstrolabe(options as WesternAstrolabeOptions);
+  const targetDate = `${options.targetYear}-${String(options.targetMonth).padStart(2, '0')}-${String(options.targetDay).padStart(2, '0')}`;
+  const anchorDateTime = `${targetDate} ${String(options.targetHour ?? 12).padStart(2, '0')}:${String(options.targetMinute ?? 0).padStart(2, '0')}`;
+  const houseRulerChain = buildHouseRulerChainText(natalData);
+  const natalSummary = buildNatalSummary(natalData);
+
+  return {
+    natalSummary,
+    scopeType: 'solar_return',
+    targetDate,
+    anchorDateTime,
+    houseRulerChain,
+    transitAspects: [],
+    transitHouses: [],
+    limitationNotice: SOLAR_RETURN_NOTICE,
+  };
+}
+
+/**
+ * 次限推进（Secondary Progression）分析
+ *
+ * 调用 celestine calculateProgression() 获取次限推进数据，
+ * 映射为 WesternScopeData 格式。
+ *
+ * @param options 运限分析输入
+ * @returns 次限推进分析数据
+ */
+function buildSecondaryProgressionScope(options: WesternScopeOptions): WesternScopeData {
+  const natalData = generateWesternAstrolabe(options as WesternAstrolabeOptions);
+
+  validateSolarDate(options.targetYear, options.targetMonth, options.targetDay);
+  const targetHour = options.targetHour ?? 12;
+  const targetMinute = options.targetMinute ?? 0;
+  validateTimePart(targetHour, targetMinute);
+
+  const targetDate = `${options.targetYear}-${String(options.targetMonth).padStart(2, '0')}-${String(options.targetDay).padStart(2, '0')}`;
+  const anchorDateTime = `${targetDate} ${String(targetHour).padStart(2, '0')}:${String(targetMinute).padStart(2, '0')}`;
+
+  const houseRulerChain = buildHouseRulerChainText(natalData);
+  const natalSummary = buildNatalSummary(natalData);
+
+  const birth: ProgressionBirthData = {
+    year: options.year,
+    month: options.month,
+    day: options.day,
+    hour: options.hour,
+    minute: options.minute,
+    second: 0,
+    timezone: options.timezone ?? 8,
+    latitude: options.latitude,
+    longitude: options.longitude,
+  };
+
+  const target = {
+    year: options.targetYear,
+    month: options.targetMonth,
+    day: options.targetDay,
+    hour: targetHour,
+    minute: targetMinute,
+  };
+
+  let progressedChart: ProgressedChart | null = null;
+  try {
+    progressedChart = calculateProgression(birth, target, {
+      type: 'secondary',
+      includeNatalAspects: true,
+      includeProgressedAspects: false,
+    });
+  } catch {
+    return {
+      natalSummary,
+      scopeType: 'secondary_progression',
+      targetDate,
+      anchorDateTime,
+      houseRulerChain,
+      transitAspects: [],
+      transitHouses: [],
+      limitationNotice: '次限推进计算失败：celestine calculateProgression 调用出错。',
+    };
+  }
+
+  const cusps = getNatalHouseCusps(natalData);
+
+  const transitAspects: WesternTransitAspect[] = progressedChart.aspectsToNatal
+    .sort((first, second) => second.strength - first.strength || first.deviation - second.deviation)
+    .slice(0, 12)
+    .map(mapProgressedAspect);
+
+  const transitHouses: WesternTransitHouse[] = cusps
+    ? progressedChart.planets
+        .filter((planet) => VALID_PLANET_NAMES.has(planet.name))
+        .map((planet) => ({
+          body: planet.name,
+          bodyLabel: PLANET_LABELS[planet.name] ?? planet.name,
+          position: `${SIGN_LABELS[planet.signName] ?? planet.signName}${planet.degree}°${String(planet.minute).padStart(2, '0')}′`,
+          natalHouse: getNatalHouseByLongitude(planet.longitude, cusps),
+          isRetrograde: planet.isRetrograde,
+        }))
+    : [];
+
+  return {
+    natalSummary,
+    scopeType: 'secondary_progression',
+    targetDate,
+    anchorDateTime,
+    houseRulerChain,
+    transitAspects,
+    transitHouses,
+    limitationNotice: TECH_LIMIT_NOTICE,
+  };
+}
+
+/**
+ * 将 celestine ProgressedAspect 映射为 WesternTransitAspect
+ *
+ * @param aspect 次限推进相位
+ * @returns 行运相位格式
+ */
+function mapProgressedAspect(aspect: ProgressedAspect): WesternTransitAspect {
+  const bodyEnum = aspect.progressedBodyEnum ?? '';
+  return {
+    transitingBody: bodyEnum || aspect.progressedBody,
+    transitingBodyLabel: PLANET_LABELS[bodyEnum] ?? PLANET_LABELS[aspect.progressedBody] ?? aspect.progressedBody,
+    natalPoint: aspect.natalBody,
+    natalPointLabel: NATAL_POINT_NAME_MAP[aspect.natalBody] ?? aspect.natalBody,
+    aspectType: ASPECT_LABELS[aspect.aspectType] ?? aspect.aspectType,
+    symbol: aspect.symbol,
+    deviation: Number(aspect.deviation.toFixed(2)),
+    strength: Math.round(aspect.strength),
+    phase: PHASE_LABELS[aspect.phase] ?? aspect.phase,
+    isRetrograde: aspect.isRetrograde,
   };
 }
